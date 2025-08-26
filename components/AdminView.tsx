@@ -366,7 +366,7 @@ const AdminView: React.FC = () => {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [toastInfo, setToastInfo] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' });
+
     const [qrModalPassenger, setQrModalPassenger] = useState<Passenger | null>(null);
 
     useEffect(() => {
@@ -393,8 +393,8 @@ const AdminView: React.FC = () => {
     }, []);
 
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-        setToastInfo({ show: true, message, type });
-        setTimeout(() => setToastInfo({ show: false, message: '', type: 'success' }), 5000);
+        // setToastInfo({ show: true, message, type });
+        // setTimeout(() => setToastInfo({ show: false, message: '', type: 'success' }), 5000);
     };
 
     const TabButton: React.FC<{ activeView: string, targetView: string, label: string, icon: React.ReactNode, onClick: () => void }> = 

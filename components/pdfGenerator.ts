@@ -5,7 +5,7 @@ import { CORPORACION_JF_LOGO_B64, CORPORACION_JF_CIRCULAR_LOGO_B64 } from './Ico
 
 export const generateReportPDF = (report: Report) => {
     const doc = new jsPDF();
-    const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+
     const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
 
     const verifiersDataString = localStorage.getItem('VERIFIERS_DATA');
@@ -127,7 +127,7 @@ export const generateReportPDF = (report: Report) => {
             3: { halign: 'center' },
             4: { halign: 'center' },
         },
-        didDrawPage: (data: any) => {
+        didDrawPage: (_data: any) => {
             // --- Footer ---
             const footerY = 250;
             doc.setFontSize(10);

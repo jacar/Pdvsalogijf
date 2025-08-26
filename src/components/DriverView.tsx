@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import type { Passenger, Report, RegisteredPassenger, Driver } from '../types';
 import { mockApi } from '../App';
 import QRScannerModal from './QRScannerModal';
-import { IdCardIcon, ErrorIcon, LogIcon, PlusIcon, QRIcon, DownloadIcon } from './Icons';
+import { IdCardIcon, ErrorIcon, LogIcon, PlusIcon, QRIcon } from './Icons';
 import SetupView from './SetupView';
 import ActiveReport from './ActiveReport';
-import { generateReportPDF } from './pdfGenerator';
+// import { generateReportPDF } from './pdfGenerator';
 
 // --- Toast Component ---
 const Toast: React.FC<{ message: string; show: boolean; onClose: () => void; type?: 'success' | 'error'}> = ({ message, show, onClose, type = 'success' }) => {
@@ -26,27 +26,16 @@ const Toast: React.FC<{ message: string; show: boolean; onClose: () => void; typ
 
 interface IdentificationViewProps {
     onScanClick: () => void;
-    onManualSubmit: (cedula: string) => void;
-    errorMessage: string;
 }
 
-const IdentificationView: React.FC<IdentificationViewProps> = ({ onScanClick, onManualSubmit, errorMessage }) => {
-    const [cedula, setCedula] = useState('');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (cedula.trim()) {
-            onManualSubmit(cedula.trim());
-        }
-    };
-    
+const IdentificationView: React.FC<IdentificationViewProps> = ({ onScanClick }) => {
     return (
          <div className="max-w-md mx-auto bg-white p-8 mt-10 rounded-xl shadow-lg border border-gray-200 text-center">
             <div className="flex flex-col items-center gap-4 mb-6">
                 <div className="bg-red-100 p-4 rounded-full"><IdCardIcon className="w-8 h-8 text-red-600" /></div>
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Iniciar Nuevo Reporte</h2>
-                    <p className="text-gray-500">Escanee el QR del pasajero o ingrese su cédula para comenzar.</p>
+                    <p className="text-gray-500">Escanee el QR del pasajero para comenzar.</p>
                 </div>
             </div>
             <div className="my-6">
@@ -54,42 +43,6 @@ const IdentificationView: React.FC<IdentificationViewProps> = ({ onScanClick, on
                     <QRIcon className="w-7 h-7" /> Escanear QR para Iniciar
                 </button>
             </div>
-
-            <div className="relative flex py-4 items-center">
-                <div className="flex-grow border-t border-gray-200"></div>
-                <span className="flex-shrink mx-4 text-gray-500 text-sm font-semibold uppercase">O ingrese manualmente</span>
-                <div className="flex-grow border-t border-gray-200"></div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label htmlFor="cedula-manual" className="sr-only">Número de Cédula</label>
-                    <input
-                        id="cedula-manual"
-                        type="text"
-                        value={cedula}
-                        onChange={(e) => setCedula(e.target.value)}
-                        placeholder="Ingrese Nro. de Cédula del pasajero"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-                        pattern="\d*"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    disabled={!cedula.trim()}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-red-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                    <IdCardIcon className="w-5 h-5" />
-                    Iniciar con Cédula
-                </button>
-            </form>
-
-            {errorMessage && (
-                <div className="bg-red-100 text-red-700 p-3 rounded-lg flex items-center gap-2 mt-4 text-sm">
-                   <ErrorIcon className="w-5 h-5 flex-shrink-0" />
-                    <span>{errorMessage}</span>
-                </div>
-            )}
         </div>
     );
 };
@@ -154,7 +107,7 @@ const DriverView: React.FC<DriverViewProps> = ({ driver }) => {
     const [activeReport, setActiveReport] = useState<Report | null>(null);
     const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
     const [qrScanContext, setQrScanContext] = useState<'start' | 'add'>('start');
-    const [errorMessage, setErrorMessage] = useState('');
+
     const [isSending, setIsSending] = useState(false);
     const [toastInfo, setToastInfo] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' });
 
@@ -173,13 +126,12 @@ const DriverView: React.FC<DriverViewProps> = ({ driver }) => {
     };
 
     const handleIdentify = async (cedula: string) => {
-        setErrorMessage('');
         const passenger = await mockApi.findPassengerByCedula(cedula);
         if (passenger) {
             setInitialPassenger(passenger);
             setView('setup');
         } else {
-            setErrorMessage(`Pasajero con cédula "${cedula}" no encontrado.`);
+            showToast(`Pasajero con cédula "${cedula}" no encontrado.`, 'error');
         }
     };
 
@@ -254,18 +206,14 @@ const DriverView: React.FC<DriverViewProps> = ({ driver }) => {
             case 'history': return <HistoryView reports={completedReports} onStartNew={() => setView('identify')} />;
             case 'identify': return <IdentificationView 
                 onScanClick={() => {
-                    setErrorMessage('');
                     setQrScanContext('start');
                     setIsQRScannerOpen(true);
                 }}
-                onManualSubmit={handleIdentify}
-                errorMessage={errorMessage} 
             />;
             case 'setup': return initialPassenger ? <SetupView passenger={initialPassenger} driver={driver} onStartTrip={handleStartTrip} /> : null;
             case 'active': return activeReport ? <ActiveReport 
                 report={activeReport} 
                 onAddPassenger={() => {
-                    setErrorMessage('');
                     setQrScanContext('add');
                     setIsQRScannerOpen(true);
                 }} 

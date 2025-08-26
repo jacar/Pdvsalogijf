@@ -29,7 +29,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ onClose, onScanSuccess 
             }
         };
 
-        const handleError = (errorMessage: string) => {
+        const handleError = (_error: string) => {
             // This callback is called frequently, so it's best to keep it quiet
         };
 
@@ -50,7 +50,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ onClose, onScanSuccess 
                 },
                 /* verbose= */ false
             );
-            scanner.render(handleSuccess, handleError);
+                            scanner.render(handleSuccess, handleError);
         }
 
         return () => {

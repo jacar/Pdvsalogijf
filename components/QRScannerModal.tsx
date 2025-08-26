@@ -28,7 +28,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ onClose, onScanSuccess 
             }
         };
 
-        const handleError = (errorMessage: string) => {
+        const handleError = (_error: string) => {
             // This callback is called frequently, can be ignored.
         };
 
